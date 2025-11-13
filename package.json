@@ -1,0 +1,40 @@
+{
+  "name": "bchain-media-authenticity",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "ts-node api/src/server.ts",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write .",
+    "test": "hardhat test",
+    "coverage": "hardhat coverage",
+    "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy/deployMediaRegistry.ts --network hardhat"
+  },
+  "dependencies": {
+    "@fastify/multipart": "^9.3.0",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/contracts": "^5.4.0",
+    "commander": "^11.0.0",
+    "dotenv": "^16.3.0",
+    "ethers": "^6.8.0",
+    "fastify": "^4.25.0",
+    "ipfs-http-client": "^60.0.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/commander": "^2.12.5",
+    "@types/node": "^20.8.0",
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "@typescript-eslint/parser": "^6.7.0",
+    "eslint": "^8.50.0",
+    "hardhat": "^2.19.0",
+    "prettier": "^3.0.3",
+    "solidity-coverage": "^0.8.16",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  }
+}
