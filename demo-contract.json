@@ -1,0 +1,7 @@
+{
+  "title": "Demo Contract Document",
+  "type": "Legal Agreement",
+  "date": "2025-11-13",
+  "parties": ["Alice Corp", "Bob Inc"],
+  "terms": "This is a demonstration contract for the BChain authenticity system"
+}
