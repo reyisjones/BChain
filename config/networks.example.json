@@ -1,0 +1,10 @@
+{
+  "polygonMumbai": {
+    "rpc": "https://polygon-mumbai.infura.io/v3/YOUR_KEY",
+    "explorer": "https://mumbai.polygonscan.com"
+  },
+  "baseSepolia": {
+    "rpc": "https://base-sepolia.infura.io/v3/YOUR_KEY",
+    "explorer": "https://sepolia.basescan.org"
+  }
+}
