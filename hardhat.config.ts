@@ -23,12 +23,17 @@ const config: HardhatUserConfig = {
     baseSepolia: {
       url: process.env.BASE_SEPOLIA_RPC || "",
       accounts
+    },
+    sepolia: {
+      url: process.env.SEPOLIA_RPC || "",
+      accounts
     }
   },
   etherscan: {
     apiKey: {
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
-      baseSepolia: process.env.BASESCAN_API_KEY || ""
+      baseSepolia: process.env.BASESCAN_API_KEY || "",
+      sepolia: process.env.ETHERSCAN_API_KEY || ""
     }
   }
 };
