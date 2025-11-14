@@ -1,8 +1,23 @@
 # BChain Media Authenticity
 
-> **Status: Phase 1 MVP Complete ✅** | All tests passing | 72% coverage | Ready for testnet deployment
+> **Status: Phase 2 - Testing & Deployment** 🚀 | 15 tests passing | **94% coverage** | Testnet deployment ready
 
 Blockchain-based authenticity & provenance for digital contracts and associated media (images, audio, video, documents). Stores verifiable content & metadata hashes on-chain while keeping bulk media off-chain (IPFS / Arweave) with EIP-712 signed operations.
+
+## 🎯 Current Phase: Phase 2
+
+✅ **Completed:**
+- Smart contract with EIP-712 signatures
+- Comprehensive test suite (94% coverage)
+- CLI tool (hash, register, verify)
+- API server (5 endpoints)
+- Documentation suite
+- Git repository with conventional commits
+
+🔄 **In Progress:**
+- Testnet deployment (Polygon Mumbai / Base Sepolia)
+- IPFS integration
+- CI/CD pipeline
 
 ## Quick Start
 
