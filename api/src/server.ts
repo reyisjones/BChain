@@ -3,6 +3,10 @@ import dotenv from 'dotenv';
 import { ethers } from 'ethers';
 import { createHash } from 'crypto';
 import multipart from '@fastify/multipart';
+import { IPFSService } from './services/ipfs';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
 
 dotenv.config();
 
@@ -11,6 +15,7 @@ fastify.register(multipart);
 
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL || 'http://localhost:8545');
 const contractAddress = process.env.CONTRACT_ADDRESS;
+const ipfsService = new IPFSService();
 
 const abi = [
   'function register(address owner, bytes32 contentHash, bytes32 metadataRoot, string uri, string mimeType, bytes signature) returns (bytes32)',
@@ -19,7 +24,11 @@ const abi = [
   'function domainSeparator() view returns (bytes32)'
 ];
 
-fastify.get('/health', async () => ({ status: 'ok', contract: contractAddress }));
+fastify.get('/health', async () => ({
+  status: 'ok',
+  contract: contractAddress,
+  ipfs: ipfsService.isConfigured() ? 'configured' : 'not configured'
+}));
 
 // Register asset endpoint
 fastify.post<{
@@ -130,8 +139,10 @@ fastify.get<{
   }
 });
 
-// Hash file upload endpoint
-fastify.post('/assets/hash', async (request, reply) => {
+// Hash file upload endpoint (with optional IPFS upload)
+fastify.post<{
+  Querystring: { uploadToIPFS?: string };
+}>('/assets/hash', async (request, reply) => {
   try {
     const data = await request.file();
     if (!data) {
@@ -142,15 +153,128 @@ fastify.post('/assets/hash', async (request, reply) => {
     const sha256 = createHash('sha256').update(buffer).digest('hex');
     const contentHash = ethers.keccak256('0x' + sha256);
 
-    return {
+    const response: any = {
       filename: data.filename,
       sha256: '0x' + sha256,
-      contentHash
+      contentHash,
+      mimeType: data.mimetype
     };
+
+    // Optional IPFS upload
+    if (request.query.uploadToIPFS === 'true') {
+      if (!ipfsService.isConfigured()) {
+        return reply.code(400).send({ error: 'IPFS not configured. Set PINATA_JWT in .env' });
+      }
+
+      try {
+        // Save buffer to temp file for upload
+        const tempDir = os.tmpdir();
+        const tempPath = path.join(tempDir, `${Date.now()}-${data.filename}`);
+        fs.writeFileSync(tempPath, buffer);
+
+        // Upload to IPFS
+        const cid = await ipfsService.uploadFile(tempPath, {
+          name: data.filename,
+          keyvalues: {
+            sha256: '0x' + sha256,
+            contentHash,
+            uploadedAt: new Date().toISOString()
+          }
+        });
+
+        // Cleanup temp file
+        fs.unlinkSync(tempPath);
+
+        response.ipfs = {
+          cid,
+          url: ipfsService.getGatewayURL(cid),
+          uri: `ipfs://${cid}`
+        };
+      } catch (ipfsError: any) {
+        request.log.error('IPFS upload failed:', ipfsError);
+        response.ipfsError = ipfsError.message;
+      }
+    }
+
+    return response;
   } catch (err: any) {
     request.log.error(err);
     return reply.code(400).send({ error: err.message });
   }
+});
+
+// Upload file to IPFS endpoint
+fastify.post('/ipfs/upload', async (request, reply) => {
+  try {
+    if (!ipfsService.isConfigured()) {
+      return reply.code(400).send({ error: 'IPFS not configured. Set PINATA_JWT in .env' });
+    }
+
+    const data = await request.file();
+    if (!data) {
+      return reply.code(400).send({ error: 'No file uploaded' });
+    }
+
+    const buffer = await data.toBuffer();
+
+    // Compute hashes
+    const sha256 = createHash('sha256').update(buffer).digest('hex');
+    const contentHash = ethers.keccak256('0x' + sha256);
+
+    // Save buffer to temp file
+    const tempDir = os.tmpdir();
+    const tempPath = path.join(tempDir, `${Date.now()}-${data.filename}`);
+    fs.writeFileSync(tempPath, buffer);
+
+    // Upload to IPFS
+    const cid = await ipfsService.uploadFile(tempPath, {
+      name: data.filename,
+      keyvalues: {
+        sha256: '0x' + sha256,
+        contentHash,
+        mimeType: data.mimetype,
+        uploadedAt: new Date().toISOString()
+      }
+    });
+
+    // Cleanup
+    fs.unlinkSync(tempPath);
+
+    return {
+      success: true,
+      filename: data.filename,
+      mimeType: data.mimetype,
+      size: buffer.length,
+      sha256: '0x' + sha256,
+      contentHash,
+      ipfs: {
+        cid,
+        url: ipfsService.getGatewayURL(cid),
+        uri: `ipfs://${cid}`
+      }
+    };
+  } catch (err: any) {
+    request.log.error(err);
+    return reply.code(500).send({ error: err.message });
+  }
+});
+
+// Test IPFS connection
+fastify.get('/ipfs/test', async (request, reply) => {
+  if (!ipfsService.isConfigured()) {
+    return reply.code(400).send({ 
+      configured: false, 
+      message: 'PINATA_JWT not set in .env' 
+    });
+  }
+
+  const isConnected = await ipfsService.testConnection();
+  
+  return {
+    configured: true,
+    connected: isConnected,
+    message: isConnected ? 'IPFS service operational' : 'Failed to authenticate with Pinata'
+  };
 });
 
 const port = Number(process.env.PORT || 3000);
