@@ -1,23 +1,34 @@
 # BChain Media Authenticity
 
-> **Status: Phase 2 - Testing & Deployment** 🚀 | 15 tests passing | **94% coverage** | Testnet deployment ready
+![CI/CD](https://github.com/reyisjones/BChain/workflows/CI%2FCD%20Pipeline/badge.svg)
+![Tests](https://img.shields.io/badge/tests-15%20passing-success)
+![Coverage](https://img.shields.io/badge/coverage-94%25-success)
+![License](https://img.shields.io/badge/license-MIT-blue)
+
+> **Status: Phase 2 Complete** ✅ | Testnet-ready | IPFS integrated | CI/CD configured
 
 Blockchain-based authenticity & provenance for digital contracts and associated media (images, audio, video, documents). Stores verifiable content & metadata hashes on-chain while keeping bulk media off-chain (IPFS / Arweave) with EIP-712 signed operations.
 
-## 🎯 Current Phase: Phase 2
+## 🎯 Project Status
 
-✅ **Completed:**
+✅ **Phase 1: Core Development** (Complete)
 - Smart contract with EIP-712 signatures
 - Comprehensive test suite (94% coverage)
 - CLI tool (hash, register, verify)
-- API server (5 endpoints)
-- Documentation suite
-- Git repository with conventional commits
+- API server with 8 endpoints
+- Complete documentation suite
 
-🔄 **In Progress:**
-- Testnet deployment (Polygon Mumbai / Base Sepolia)
-- IPFS integration
-- CI/CD pipeline
+✅ **Phase 2: Infrastructure** (Complete)
+- Testnet deployment ready (Mumbai, Base Sepolia, Sepolia)
+- IPFS integration via Pinata
+- CI/CD pipeline with GitHub Actions
+- Automated testing & coverage reporting
+
+⏳ **Phase 3: Production** (Next)
+- Mainnet deployment
+- Frontend application
+- Advanced monitoring
+- Security audit
 
 ## Quick Start
 
