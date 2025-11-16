@@ -7,9 +7,216 @@
 
 > **Status: Phase 2 Complete** ✅ | Testnet-ready | IPFS integrated | CI/CD configured
 
-Blockchain-based authenticity & provenance for digital contracts and associated media (images, audio, video, documents). Stores verifiable content & metadata hashes on-chain while keeping bulk media off-chain (IPFS / Arweave) with EIP-712 signed operations.
+## 📖 What is BChain?
 
-## 🎯 Project Status
+**BChain** is a blockchain-based system that provides **cryptographic proof of authenticity** for digital contracts and media files. It solves the critical problem of verifying that digital documents, images, videos, and audio files haven't been tampered with since their creation.
+
+### The Problem
+
+In today's digital world:
+- 📄 Legal contracts can be altered after signing
+- 🖼️ Images and videos can be deepfaked or manipulated
+- 🎵 Audio recordings lack verifiable authenticity
+- 📝 Document provenance is difficult to prove
+- ⚖️ Disputes arise over "who created what, when?"
+
+### The Solution
+
+BChain creates an **immutable record** on the blockchain that proves:
+- ✅ **Authenticity** - File hasn't been modified
+- ✅ **Ownership** - Who created/owns the content
+- ✅ **Timestamp** - Exact registration time
+- ✅ **Provenance** - Complete history of updates
+- ✅ **Verification** - Anyone can verify authenticity
+
+### How It Works
+
+```
+1. Upload File → 2. Generate Hash → 3. Sign with Wallet → 4. Store on Blockchain
+                                                                    ↓
+                    Anyone can verify ← Download & Compare ← Immutable Record
+```
+
+**Key Features:**
+- 🔐 **EIP-712 Cryptographic Signatures** - Military-grade security
+- 🌐 **IPFS Decentralized Storage** - Files never lost or censored
+- ⛓️ **Multi-chain Support** - Polygon, Base, Ethereum testnets
+- 🔄 **Version Tracking** - Update files while maintaining history
+- 🔗 **Contract Linking** - Link media to legal agreements
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+Before you begin, ensure you have:
+- **Node.js 18+** - [Download](https://nodejs.org/)
+- **Git** - [Download](https://git-scm.com/)
+- **MetaMask** (optional) - For testnet interaction
+
+### 1. Clone & Install
+
+```bash
+# Clone repository
+git clone https://github.com/reyisjones/BChain.git
+cd BChain
+
+# Install dependencies
+npm install
+
+# Compile smart contracts
+npx hardhat compile
+```
+
+### 2. Run Tests
+
+```bash
+# Run all tests (should see 15 passing ✅)
+npx hardhat test
+
+# Run with coverage report
+npx hardhat coverage
+
+# Run demo workflow
+npx hardhat test test/Demo.ts
+```
+
+**Expected output:**
+```
+✅ 15 passing (2s)
+📊 Coverage: 94.29%
+```
+
+### 3. Start Local Blockchain
+
+```bash
+# Terminal 1: Start local Hardhat node
+npx hardhat node
+
+# Terminal 2: Deploy contract
+npx hardhat run scripts/deploy/deployMediaRegistry.ts --network localhost
+```
+
+**Save the contract address** printed in the console!
+
+### 4. Start API Server
+
+```bash
+# Set environment variables
+cp .env.example .env
+# Edit .env and add:
+# CONTRACT_ADDRESS=<address from step 3>
+
+# Start server
+cd api
+npm run dev
+```
+
+Server runs on `http://localhost:3000`
+
+### 5. Test the API
+
+```bash
+# Health check
+curl http://localhost:3000/health
+
+# Hash a file
+curl -X POST http://localhost:3000/assets/hash \
+  -F "file=@/path/to/your/file.pdf"
+
+# Upload to IPFS (requires PINATA_JWT in .env)
+curl -X POST "http://localhost:3000/assets/hash?uploadToIPFS=true" \
+  -F "file=@/path/to/your/file.pdf"
+```
+
+### 6. Use CLI Tool
+
+```bash
+# Hash a file
+node cli hash ./docs/Design.md
+
+# Register asset (requires signature)
+node cli register \
+  --content-hash 0x... \
+  --owner 0xYourAddress \
+  --uri ipfs://QmHash \
+  --mime-type application/pdf \
+  --signature 0x...
+
+# Verify asset
+node cli verify --asset-id 0x...
+```
+
+## 🎯 Use Cases
+
+### 1. Legal Contract Authentication
+- Law firms register executed contracts
+- Clients verify contracts haven't been altered
+- Timestamped proof for court proceedings
+
+### 2. Digital Media Rights
+- Photographers prove original authorship
+- Artists protect against copyright infringement
+- Content creators establish ownership
+
+### 3. Corporate Documentation
+- Companies authenticate official documents
+- Auditors verify document integrity
+- Compliance departments maintain provenance
+
+### 4. Academic Research
+- Researchers timestamp discoveries
+- Universities verify thesis submissions
+- Journals authenticate published papers
+
+### 5. Supply Chain Verification
+- Manufacturers certify product specifications
+- Inspectors verify compliance documents
+- Consumers validate authenticity certificates
+
+## 🏗️ Architecture
+
+BChain uses a **hybrid architecture** combining blockchain and decentralized storage:
+
+```
+┌─────────────────┐
+│   User Upload   │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐      ┌──────────────┐
+│   API Server    │─────▶│  IPFS/Pinata │ (File Storage)
+│   (Fastify)     │      └──────────────┘
+└────────┬────────┘
+         │ Hash + Signature
+         ▼
+┌─────────────────┐      ┌──────────────┐
+│ Smart Contract  │─────▶│  Blockchain  │ (Hash Storage)
+│ (MediaRegistry) │      │ Polygon/Base │
+└─────────────────┘      └──────────────┘
+```
+
+### Technology Stack
+
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| **Smart Contract** | Solidity 0.8.20 | Immutable hash registry |
+| **Blockchain** | Polygon, Base, Ethereum | Decentralized ledger |
+| **Storage** | IPFS (Pinata) | Decentralized file storage |
+| **Backend** | Node.js + Fastify | API endpoints |
+| **Testing** | Hardhat + Chai | Contract testing |
+| **CI/CD** | GitHub Actions | Automated testing & deployment |
+| **Signatures** | EIP-712 | Cryptographic signing |
+
+### Data Flow
+
+1. **Upload**: User uploads file via API or CLI
+2. **Hash**: System computes SHA-256 → Keccak256 hash
+3. **IPFS**: File uploaded to IPFS, returns CID
+4. **Sign**: User signs registration with EIP-712 signature
+5. **Register**: Contract stores hash, owner, timestamp on-chain
+6. **Verify**: Anyone can download file, recompute hash, compare with blockchain
+
+## 📊 Project Status
 
 ✅ **Phase 1: Core Development** (Complete)
 - Smart contract with EIP-712 signatures
@@ -26,156 +233,223 @@ Blockchain-based authenticity & provenance for digital contracts and associated 
 
 ⏳ **Phase 3: Production** (Next)
 - Mainnet deployment
-- Frontend application
-- Advanced monitoring
-- Security audit
+- Frontend web application
+- Advanced monitoring & analytics
+- Professional security audit
 
-## Quick Start
+## 🔐 MediaRegistry Smart Contract
 
-### Prerequisites
-- Node.js 18+
-- pnpm or npm
-- Git
+The core of BChain is the `MediaRegistry.sol` smart contract that provides:
 
-### Install & Compile
-```bash
-npm install
-npx hardhat compile
+### Core Functions
+
+```solidity
+// Register new asset with cryptographic signature
+function register(
+    address owner,
+    bytes32 contentHash,
+    bytes32 metadataRoot,
+    string uri,
+    string mimeType,
+    bytes signature
+) returns (bytes32 assetId)
+
+// Update existing asset (version-controlled)
+function update(
+    bytes32 assetId,
+    bytes32 newContentHash,
+    bytes32 newMetadataRoot,
+    string newUri,
+    bytes signature
+)
+
+// Transfer ownership to another address
+function transferOwnership(bytes32 assetId, address newOwner)
+
+// Link to external legal contract
+function linkContract(bytes32 assetId, bytes32 contractRefHash)
+
+// Retrieve asset details
+function getAsset(bytes32 assetId) view returns (Asset)
 ```
 
-### Run Local Node & Tests
-```bash
-npx hardhat test
-```
+### Events Emitted
 
-### Run API (dev)
-```bash
-npm run dev
-```
+- `AssetRegistered` - New asset created
+- `AssetUpdated` - Asset modified (version incremented)
+- `OwnershipTransferred` - Owner changed
+- `ContractLinked` - Legal contract linked
 
-### CLI Hash (placeholder)
-```bash
-node cli/index.ts hash ./path/to/file.png
-```
+### Security Features
 
-## Architecture Summary
-See `Design.md` for full detail. Hybrid approach:
-- On-chain (Solidity / EVM – Polygon/Base): Asset registry with content hash, metadata root, ownership & events.
-- Off-chain storage: IPFS primary; optional Arweave/Azure/S3.
-- Backend service (Fastify): hash verification, orchestration, future webhooks.
-- CLI + (future) lightweight admin UI.
+- ✅ **EIP-712 Signatures** - Prevents replay attacks across chains/contracts
+- ✅ **Version Control** - Updates require correct version number
+- ✅ **Owner-Only Operations** - Access control on sensitive functions
+- ✅ **Zero Address Protection** - Prevents invalid ownership
+- ✅ **Duplicate Prevention** - Can't register same asset twice
 
-| Layer | Tech | Responsibility |
-|-------|------|----------------|
-| Smart Contracts | Solidity | Immutable integrity anchors (hashes, owner, timestamps) |
-| Off-chain Storage | IPFS / Arweave | Media & metadata blobs |
-| Verification Service | Node.js | Hash recompute, submission, provenance queries |
-| Frontend | React (planned) | Upload & verify UX |
-| CI/CD & Monitoring | GitHub Actions / (future) Azure Monitor | Tests, deploy, health & alerts |
-
-## MediaRegistry Contract (MVP)
-Core responsibilities:
-- Register asset with (contentHash, metadataRoot, uri, mimeType) via EIP-712 signed payload.
-- Update asset (new hashes, uri) with versioned EIP-712 signature.
-- Transfer ownership.
-- Link an external contract/document hash.
-
-### Events
-```
-AssetRegistered(bytes32 assetId, address owner, bytes32 contentHash, bytes32 metadataRoot, string uri, string mimeType)
-AssetUpdated(bytes32 assetId, uint256 version, bytes32 contentHash, bytes32 metadataRoot, string uri)
-OwnershipTransferred(bytes32 assetId, address oldOwner, address newOwner)
-ContractLinked(bytes32 assetId, bytes32 contractRefHash)
-```
-
-### Asset ID Formula
-```
+**Asset ID Formula:**
+```solidity
 assetId = keccak256(abi.encodePacked(contentHash, owner, metadataRoot))
 ```
 
-### EIP-712 Signature Validation ✓
-Two struct types for typed data signing:
-```solidity
-Register(address owner, bytes32 contentHash, bytes32 metadataRoot, string uri, string mimeType)
-Update(bytes32 assetId, bytes32 contentHash, bytes32 metadataRoot, string uri, uint256 version)
+## 🌐 API Endpoints
+
+The Fastify-based API server provides RESTful endpoints:
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/health` | Health check with IPFS status |
+| POST | `/assets/hash` | Hash file (optionally upload to IPFS) |
+| POST | `/assets/register` | Register asset on blockchain |
+| POST | `/assets/verify` | Verify file against blockchain |
+| GET | `/assets/:assetId` | Get asset details |
+| POST | `/ipfs/upload` | Upload file to IPFS |
+| GET | `/ipfs/test` | Test IPFS connection |
+
+**Example: Hash and Upload to IPFS**
+```bash
+curl -X POST "http://localhost:3000/assets/hash?uploadToIPFS=true" \
+  -F "file=@contract.pdf"
+
+# Response:
+{
+  "filename": "contract.pdf",
+  "sha256": "0x65cb86d9c906d482...",
+  "contentHash": "0x10457300aab24c79...",
+  "mimeType": "application/pdf",
+  "ipfs": {
+    "cid": "QmYwAPJzv5CZsnA6xjKmR9YqKRVA5S7aKXcP7KQr2eR9Nj",
+    "url": "https://gateway.pinata.cloud/ipfs/Qm...",
+    "uri": "ipfs://QmYwAPJzv5CZsnA6xjKmR9YqKRVA5S7aKXcP7KQr2eR9Nj"
+  }
+}
 ```
 
-**Implementation Status:** ✅ Working
-- Contract uses OpenZeppelin's `EIP712` base for domain separation
-- String fields (`uri`, `mimeType`) are properly hashed during struct encoding
-- Off-chain `signTypedData` declarations match contract struct definitions
-- All tests passing (registration, update, access control)
+## 🛠️ CLI Tool
 
-**Key Details:**
-- Dynamic string types are automatically hashed by EIP-712 encoding rules
-- Domain: `{name: "MediaRegistry", version: "1", chainId, verifyingContract}`
-- Signature recovery via `ecrecover` with v/r/s normalization
+Command-line interface for asset management:
 
-## CLI (Planned Enhancements)
-| Command | Purpose |
-|---------|---------|
-| `bchain hash <file>` | Compute SHA-256 (soon keccak pipeline) |
-| `bchain register ...` | Prepare & submit signed registration |
-| `bchain verify ...` | Recompute and compare against on-chain |
-| `bchain update ...` | Submit signed update |
-| `bchain link-contract ...` | Link external legal contract hash |
+```bash
+# Hash a file
+node cli hash ./document.pdf
 
-## API Endpoints
+# Register asset (requires EIP-712 signature)
+node cli register \
+  --content-hash 0xabc123... \
+  --owner 0xYourAddress \
+  --uri ipfs://QmHash \
+  --mime-type application/pdf \
+  --signature 0xdef456...
 
-| Method | Endpoint | Description | Status |
-|--------|----------|-------------|--------|
-| GET | /health | Health check | ✅ |
-| POST | /assets/register | Register new asset with EIP-712 signature | ✅ |
-| POST | /assets/verify | Verify file hash against on-chain asset | ✅ |
-| GET | /assets/:assetId | Retrieve stored asset record | ✅ |
-| POST | /assets/hash | Hash uploaded file (SHA-256 → keccak256) | ✅ |
+# Verify asset
+node cli verify --asset-id 0x789...
+```
 
-**Note:** Update and link-contract endpoints planned for Phase 2.
+## 🧪 Testing & Coverage
 
-## Development Workflow
-1. Write/update contract in `contracts/`.
-2. Run `npx hardhat compile`.
-3. Add or extend tests in `test/`.
-4. Execute `npx hardhat test` (all passing ✅).
-5. Check coverage: `npx hardhat coverage` (current: 72%).
-6. Deploy: `npx hardhat run scripts/deploy/deployMediaRegistry.ts --network <network>`.
+```bash
+# Run all tests
+npx hardhat test
 
-## Security Considerations
-- ✅ **EIP-712 signatures**: Prevent cross-chain/contract replay attacks
-- ✅ **Version-based replay protection**: Updates require incrementing version
-- ✅ **Owner-only operations**: Access control on sensitive functions
-- ⚠️ **Key management**: Use hardware wallets for mainnet
-- 🔜 **Multi-signature**: Planned for high-value operations
-- 🔜 **Emergency pause**: Circuit breaker for critical issues
+# Run with gas reporting
+REPORT_GAS=true npx hardhat test
 
-See [Security Checklist](./docs/SecurityChecklist.md) for comprehensive security documentation.
+# Generate coverage report
+npx hardhat coverage
 
-## Project Status
+# Run specific test
+npx hardhat test test/MediaRegistry.ts
+```
 
-**Phase 1 MVP: ✅ Complete**
-- Smart contract with EIP-712 validation
-- All unit tests passing
-- CLI tool (hash, register, verify)
-- API server with core endpoints
-- Comprehensive documentation
+**Current Metrics:**
+- ✅ 15 tests passing
+- ✅ 94.29% statement coverage
+- ✅ 78.13% branch coverage
+- ✅ 91.67% function coverage
 
-**Next Steps:**
-- Deploy to testnet (Mumbai/Sepolia)
-- Increase test coverage to ≥90%
-- IPFS integration
-- Security audit preparation
+## 🚢 Deployment
 
-See [Roadmap](./docs/Roadmap.md) for detailed feature timeline.
+### Local Development
+```bash
+# Start local blockchain
+npx hardhat node
 
-## Documentation
+# Deploy contract
+npx hardhat run scripts/deploy/deployMediaRegistry.ts --network localhost
+```
 
-- [Getting Started](./docs/GettingStarted.md) - Setup and installation
-- [Developer Guide](./docs/DeveloperGuide.md) - Architecture and technical details
-- [Security Checklist](./docs/SecurityChecklist.md) - Security best practices
-- [Roadmap](./docs/Roadmap.md) - Future plans and enhancements
-- [Design Document](./Design.md) - System design and requirements
+### Testnet Deployment
+```bash
+# Check deployer balance
+npx hardhat run scripts/checkBalance.ts --network polygonMumbai
 
-## License
+# Deploy to Polygon Mumbai
+npx hardhat run scripts/deploy/deployMediaRegistry.ts --network polygonMumbai
+
+# Verify on Polygonscan
+npx hardhat verify --network polygonMumbai <CONTRACT_ADDRESS>
+
+# Test deployment
+CONTRACT_ADDRESS=<address> npx hardhat run scripts/testDeployment.ts --network polygonMumbai
+```
+
+See [Deployment Guide](./docs/DEPLOYMENT.md) for detailed instructions.
+
+## 📚 Documentation
+
+- **[Getting Started](./docs/GettingStarted.md)** - Installation and setup
+- **[Deployment Guide](./docs/DEPLOYMENT.md)** - Deploy to testnets/mainnet
+- **[IPFS Integration](./docs/IPFS_INTEGRATION.md)** - Decentralized storage setup
+- **[CI/CD Pipeline](./docs/CI_CD.md)** - Automated testing and deployment
+- **[Security Checklist](./docs/SecurityChecklist.md)** - Security best practices
+- **[Design Document](./Design.md)** - Architecture and technical design
+- **[Roadmap](./docs/Roadmap.md)** - Future features and timeline
+
+## 🤝 Contributing
+
+We welcome contributions! Please follow these guidelines:
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** with conventional commits (`git commit -m 'feat: add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
+
+### Commit Convention
+- `feat:` New feature
+- `fix:` Bug fix
+- `docs:` Documentation changes
+- `test:` Test additions/changes
+- `chore:` Maintenance tasks
+
+### Development Workflow
+1. Ensure all tests pass: `npx hardhat test`
+2. Check coverage: `npx hardhat coverage` (must be ≥90%)
+3. Update documentation if needed
+4. Follow code style guidelines
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **OpenZeppelin** - EIP-712 implementation
+- **Hardhat** - Development environment
+- **Pinata** - IPFS infrastructure
+- **ethers.js** - Ethereum library
+- **Fastify** - Web framework
+
+## 📧 Contact & Support
+
+- **Issues**: [GitHub Issues](https://github.com/reyisjones/BChain/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/reyisjones/BChain/discussions)
+- **Repository**: [github.com/reyisjones/BChain](https://github.com/reyisjones/BChain)
+
+---
+
+**Built with ❤️ for a more trustworthy digital world**
 
 MIT (see LICENSE file)
 
